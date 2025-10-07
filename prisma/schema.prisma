@@ -1,0 +1,214 @@
+// Prisma Schema for SaaS HRMS (Multi-tenant)
+// ------------------------------------------
+// Compatible with: Next.js + Prisma + MySQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================================================
+// 1️⃣  TENANT (Company / Organization)
+// ==================================================
+model Tenant {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  phone        String?
+  address      String?
+  logoUrl      String?
+  subscription String?   // plan name or subscription tier
+  status       String    @default("active")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  users        User[]
+  departments  Department[]
+  designations Designation[]
+  employees    Employee[]
+  attendances  Attendance[]
+  leaves       Leave[]
+  payrolls     Payroll[]
+  payslips     Payslip[]
+  logs         AuditLog[]
+}
+
+// ==================================================
+// 2️⃣  USER (System login user - Admin / Employee)
+// ==================================================
+model User {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  name        String
+  email       String   @unique
+  password    String
+  role        Role     @default(EMPLOYEE)
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  employee    Employee?
+  logs        AuditLog[]
+}
+
+// Enum for user roles
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  HR
+  MANAGER
+  EMPLOYEE
+}
+
+// ==================================================
+// 3️⃣  DEPARTMENT & DESIGNATION
+// ==================================================
+model Department {
+  id        String     @id @default(cuid())
+  tenantId  String
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  name      String
+  status    String     @default("active")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  designations Designation[]
+  employees    Employee[]
+}
+
+model Designation {
+  id           String     @id @default(cuid())
+  tenantId     String
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  title        String
+  status       String      @default("active")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  employees    Employee[]
+}
+
+// ==================================================
+// 4️⃣  EMPLOYEE
+// ==================================================
+model Employee {
+  id             String       @id @default(cuid())
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id])
+  userId         String?      @unique
+  user           User?        @relation(fields: [userId], references: [id])
+  empCode        String       @unique
+  fullName       String
+  email          String
+  phone          String?
+  gender         String?
+  dob            DateTime?
+  joinDate       DateTime
+  departmentId   String?
+  department     Department?  @relation(fields: [departmentId], references: [id])
+  designationId  String?
+  designation    Designation? @relation(fields: [designationId], references: [id])
+  salary         Float?
+  status         String       @default("active")
+  address        String?
+  imageUrl       String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  attendances    Attendance[]
+  leaves         Leave[]
+  payrolls       Payroll[]
+}
+
+// ==================================================
+// 5️⃣  ATTENDANCE
+// ==================================================
+model Attendance {
+  id          String     @id @default(cuid())
+  tenantId    String
+  tenant      Tenant     @relation(fields: [tenantId], references: [id])
+  employeeId  String
+  employee    Employee   @relation(fields: [employeeId], references: [id])
+  date        DateTime
+  checkIn     DateTime?
+  checkOut    DateTime?
+  status      String     @default("present") // present, absent, leave
+  workHours   Float?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+// ==================================================
+// 6️⃣  LEAVE MANAGEMENT
+// ==================================================
+model Leave {
+  id          String     @id @default(cuid())
+  tenantId    String
+  tenant      Tenant     @relation(fields: [tenantId], references: [id])
+  employeeId  String
+  employee    Employee   @relation(fields: [employeeId], references: [id])
+  type        String
+  startDate   DateTime
+  endDate     DateTime
+  days        Int
+  reason      String?
+  status      String     @default("pending") // pending, approved, rejected
+  approvedBy  String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+// ==================================================
+// 7️⃣  PAYROLL & PAYSLIP
+// ==================================================
+model Payroll {
+  id          String     @id @default(cuid())
+  tenantId    String
+  tenant      Tenant     @relation(fields: [tenantId], references: [id])
+  employeeId  String
+  employee    Employee   @relation(fields: [employeeId], references: [id])
+  month       String     // e.g., "2025-10"
+  basicSalary Float
+  allowance   Float?
+  deduction   Float?
+  netSalary   Float
+  status      String     @default("generated") // generated, paid
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  payslip     Payslip?
+}
+
+model Payslip {
+  id          String    @id @default(cuid())
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  payrollId   String    @unique
+  payroll     Payroll   @relation(fields: [payrollId], references: [id])
+  fileUrl     String
+  issuedDate  DateTime  @default(now())
+}
+
+// ==================================================
+// 8️⃣  AUDIT LOGS
+// ==================================================
+model AuditLog {
+  id          String     @id @default(cuid())
+  tenantId    String
+  tenant      Tenant     @relation(fields: [tenantId], references: [id])
+  userId      String?
+  user        User?      @relation(fields: [userId], references: [id])
+  action      String
+  entity      String
+  entityId    String?
+  description String?
+  ipAddress   String?
+  createdAt   DateTime   @default(now())
+}

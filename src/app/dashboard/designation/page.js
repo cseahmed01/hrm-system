@@ -155,7 +155,7 @@ export default function DesignationPage() {
         </div>
       </div>
 
-      {/* Designations Table */}
+      {/* Designations Table/Cards */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         {designationsLoading ? (
           <div className="p-8 text-center">
@@ -163,59 +163,105 @@ export default function DesignationPage() {
             <p className="mt-4 text-slate-600">Loading designations...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Department</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Employees</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-slate-200">
-                {designations.map((designation) => (
-                  <tr key={designation.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-semibold mr-3">
-                          👔
+          <>
+            {/* Mobile Cards */}
+            <div className="block sm:hidden">
+              {designations.length === 0 ? (
+                <div className="p-8 text-center text-slate-500">
+                  No designations found. Add your first designation to get started.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-200">
+                  {designations.map((designation) => (
+                    <div key={designation.id} className="p-4 hover:bg-slate-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-semibold mr-3">
+                            👔
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-slate-900">{designation.title}</div>
+                            <div className="text-xs text-slate-500">
+                              {designation.department?.name || 'No Department'} • {designation._count.employees} employees
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-sm font-medium text-slate-900">{designation.title}</div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleEditDesignation(designation)}
+                            className="text-indigo-600 hover:text-indigo-900 text-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteDesignation(designation.id)}
+                            className="text-red-600 hover:text-red-900 text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                      {designation.department?.name || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                      {designation._count.employees} employees
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleEditDesignation(designation)}
-                        className="text-indigo-600 hover:text-indigo-900 mr-4"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteDesignation(designation.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {designations.length === 0 && (
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50">
                   <tr>
-                    <td colSpan="4" className="px-6 py-12 text-center text-slate-500">
-                      No designations found. Add your first designation to get started.
-                    </td>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Title</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Department</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Employees</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="bg-white divide-y divide-slate-200">
+                  {designations.map((designation) => (
+                    <tr key={designation.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-semibold mr-3">
+                            👔
+                          </div>
+                          <div className="text-sm font-medium text-slate-900">{designation.title}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                        {designation.department?.name || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                        {designation._count.employees} employees
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => handleEditDesignation(designation)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-4"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDesignation(designation.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {designations.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-12 text-center text-slate-500">
+                        No designations found. Add your first designation to get started.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

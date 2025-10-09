@@ -221,7 +221,7 @@ export default function EmployeePage() {
         </div>
       </div>
 
-      {/* Employees Table */}
+      {/* Employees Table/Cards */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         {employeesLoading ? (
           <div className="p-8 text-center">
@@ -229,60 +229,107 @@ export default function EmployeePage() {
             <p className="mt-4 text-slate-600">Loading employees...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Employee</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Code</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Department</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Designation</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-slate-200">
-                {employees.map((employee) => (
-                  <tr key={employee.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white font-semibold">
-                          {employee.fullName.charAt(0)}
+          <>
+            {/* Mobile Cards */}
+            <div className="block sm:hidden">
+              {employees.length === 0 ? (
+                <div className="p-8 text-center text-slate-500">
+                  No employees found. Add your first employee to get started.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-200">
+                  {employees.map((employee) => (
+                    <div key={employee.id} className="p-4 hover:bg-slate-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                            {employee.fullName.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-slate-900">{employee.fullName}</div>
+                            <div className="text-xs text-slate-500">{employee.email}</div>
+                            <div className="text-xs text-slate-500">
+                              {employee.empCode} • {employee.department?.name || 'No Department'} • {employee.designation?.title || 'No Designation'}
+                            </div>
+                          </div>
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-slate-900">{employee.fullName}</div>
-                          <div className="text-sm text-slate-500">{employee.email}</div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleEditEmployee(employee)}
+                            className="text-indigo-600 hover:text-indigo-900 text-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEmployee(employee.id)}
+                            className="text-red-600 hover:text-red-900 text-sm"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{employee.empCode}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{employee.department?.name || '-'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{employee.designation?.title || '-'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleEditEmployee(employee)}
-                        className="text-indigo-600 hover:text-indigo-900 mr-4"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteEmployee(employee.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {employees.length === 0 && (
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50">
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
-                      No employees found. Add your first employee to get started.
-                    </td>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Employee</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Code</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Department</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Designation</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="bg-white divide-y divide-slate-200">
+                  {employees.map((employee) => (
+                    <tr key={employee.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white font-semibold">
+                            {employee.fullName.charAt(0)}
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-slate-900">{employee.fullName}</div>
+                            <div className="text-sm text-slate-500">{employee.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{employee.empCode}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{employee.department?.name || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{employee.designation?.title || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => handleEditEmployee(employee)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-4"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEmployee(employee.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {employees.length === 0 && (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
+                        No employees found. Add your first employee to get started.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

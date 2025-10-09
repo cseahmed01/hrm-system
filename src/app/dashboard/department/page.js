@@ -131,7 +131,7 @@ export default function DepartmentPage() {
         </div>
       </div>
 
-      {/* Departments Table */}
+      {/* Departments Table/Cards */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         {departmentsLoading ? (
           <div className="p-8 text-center">
@@ -139,59 +139,105 @@ export default function DepartmentPage() {
             <p className="mt-4 text-slate-600">Loading departments...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Department Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Employees</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Designations</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-slate-200">
-                {departments.map((department) => (
-                  <tr key={department.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-semibold mr-3">
-                          🏢
+          <>
+            {/* Mobile Cards */}
+            <div className="block sm:hidden">
+              {departments.length === 0 ? (
+                <div className="p-8 text-center text-slate-500">
+                  No departments found. Add your first department to get started.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-200">
+                  {departments.map((department) => (
+                    <div key={department.id} className="p-4 hover:bg-slate-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-semibold mr-3">
+                            🏢
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-slate-900">{department.name}</div>
+                            <div className="text-xs text-slate-500">
+                              {department._count.employees} employees • {department.designations.length} designations
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-sm font-medium text-slate-900">{department.name}</div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleEditDepartment(department)}
+                            className="text-indigo-600 hover:text-indigo-900 text-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteDepartment(department.id)}
+                            className="text-red-600 hover:text-red-900 text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                      {department._count.employees} employees
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                      {department.designations.length} designations
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleEditDepartment(department)}
-                        className="text-indigo-600 hover:text-indigo-900 mr-4"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteDepartment(department.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {departments.length === 0 && (
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50">
                   <tr>
-                    <td colSpan="4" className="px-6 py-12 text-center text-slate-500">
-                      No departments found. Add your first department to get started.
-                    </td>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Department Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Employees</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Designations</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="bg-white divide-y divide-slate-200">
+                  {departments.map((department) => (
+                    <tr key={department.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-semibold mr-3">
+                            🏢
+                          </div>
+                          <div className="text-sm font-medium text-slate-900">{department.name}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                        {department._count.employees} employees
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                        {department.designations.length} designations
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => handleEditDepartment(department)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-4"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDepartment(department.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {departments.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-12 text-center text-slate-500">
+                        No departments found. Add your first department to get started.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

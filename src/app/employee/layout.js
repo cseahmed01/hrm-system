@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
-export default function DashboardLayout({ children }) {
+export default function EmployeeLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -20,7 +21,7 @@ export default function DashboardLayout({ children }) {
       return;
     }
 
-    // Optional: Verify token with API
+    // Verify token and check role
     fetch('/api/auth/verify', {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -28,16 +29,23 @@ export default function DashboardLayout({ children }) {
     })
     .then(res => {
       if (res.ok) {
-        setIsAuthenticated(true);
+        return res.json();
       } else {
-        // Token invalid, redirect
-        localStorage.removeItem('token');
-        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        window.location.href = '/auth/login';
+        throw new Error('Invalid token');
       }
     })
+    .then(data => {
+      if (data.user.role !== 'EMPLOYEE') {
+        window.location.href = '/dashboard';
+        return;
+      }
+      setUser(data.user);
+      setIsAuthenticated(true);
+    })
     .catch(() => {
-      // Error, redirect
+      // Token invalid or wrong role, redirect
+      localStorage.removeItem('token');
+      document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       window.location.href = '/auth/login';
     })
     .finally(() => {
@@ -68,15 +76,11 @@ export default function DashboardLayout({ children }) {
   }
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/dashboard' },
-    { id: 'employee', label: 'Employees', icon: '👥', path: '/dashboard/employe' },
-    { id: 'department', label: 'Departments', icon: '🏢', path: '/dashboard/department' },
-    { id: 'designation', label: 'Designations', icon: '👔', path: '/dashboard/designation' },
-    { id: 'attendance', label: 'Attendance', icon: '📅', path: '/dashboard/attendance' },
-    { id: 'leaves', label: 'Leave Requests', icon: '🧾', path: '/dashboard/leaves' },
-    { id: 'payroll', label: 'Payroll', icon: '💰', path: '/dashboard/payroll' },
-    { id: 'activity-log', label: 'Activity Log', icon: '📝', path: '/dashboard/activity-log' },
-    { id: 'settings', label: 'Settings', icon: '⚙️', path: '/dashboard/settings' },
+    { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/employee/dashboard' },
+    { id: 'attendance', label: 'My Attendance', icon: '⏰', path: '/employee/attendance' },
+    { id: 'leaves', label: 'My Leaves', icon: '🧾', path: '/employee/leaves' },
+    { id: 'payslips', label: 'Payslips', icon: '💰', path: '/employee/payslips' },
+    { id: 'profile', label: 'Profile', icon: '👤', path: '/employee/profile' },
   ];
 
   const getActiveMenu = () => {
@@ -101,31 +105,28 @@ export default function DashboardLayout({ children }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div className="text-xl sm:text-2xl font-bold text-slate-900">ERP SaaS</div>
+            <div className="text-xl sm:text-2xl font-bold text-slate-900">Employee Portal</div>
             <span className="hidden sm:inline text-slate-500">•</span>
-            <span className="hidden sm:inline text-slate-600">Dashboard</span>
+            <span className="hidden sm:inline text-slate-600">Saad HRMS</span>
           </div>
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <button className="p-2 text-slate-400 hover:text-slate-600 hidden sm:block">
-              🔔
-            </button>
             <div className="relative">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center space-x-2 hover:bg-slate-50 px-2 sm:px-3 py-2 rounded-lg"
               >
                 <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                  A
+                  {user?.name?.charAt(0) || 'E'}
                 </div>
-                <span className="hidden sm:inline text-slate-700">Admin</span>
+                <span className="hidden sm:inline text-slate-700">{user?.name || 'Employee'}</span>
                 <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
               {showDropdown && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-10">
-                  <a href="#" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Profile</a>
-                  <a href="#" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Settings</a>
+                  <a href="/employee/profile" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Profile</a>
+                  <a href="/employee/settings" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Settings</a>
                   <hr className="my-1" />
                   <button
                     onClick={async () => {

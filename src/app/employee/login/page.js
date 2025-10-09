@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export default function Login() {
+export default function EmployeeLogin() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -41,13 +41,9 @@ export default function Login() {
           // Set cookie with proper attributes
           document.cookie = `token=${data.token}; path=/; max-age=604800; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
         }
-        // Redirect based on user role
+        // Redirect to employee dashboard
         setTimeout(() => {
-          if (data.user && data.user.role === 'EMPLOYEE') {
-            window.location.href = '/employee/dashboard';
-          } else {
-            window.location.href = '/dashboard';
-          }
+          window.location.href = '/employee/dashboard';
         }, 1000);
       } else {
         setMessage(data.error || 'Login failed');
@@ -65,9 +61,9 @@ export default function Login() {
         <div className="text-center">
           <div className="text-3xl font-bold text-slate-900 mb-2">ERP SaaS</div>
           <h2 className="text-2xl font-bold text-slate-900">
-            Welcome back!
+            Employee Login
           </h2>
-          <p className="text-slate-600">Manage your team smarter.</p>
+          <p className="text-slate-600">Access your employee dashboard.</p>
         </div>
         <form className="mt-8 space-y-6 bg-white p-8 rounded-2xl shadow-lg" onSubmit={handleSubmit}>
           <div className="space-y-4">
@@ -133,21 +129,6 @@ export default function Login() {
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
-          </div>
-
-          <div className="text-center space-y-2">
-            <p className="text-sm text-slate-600">
-              Don't have an account?{' '}
-              <a href="/auth/register" className="text-indigo-600 hover:text-indigo-500 font-medium">
-                Sign up
-              </a>
-            </p>
-            <p className="text-sm text-slate-600">
-              Are you an employee?{' '}
-              <a href="/employee/login" className="text-indigo-600 hover:text-indigo-500 font-medium">
-                Employee Login
-              </a>
-            </p>
           </div>
 
           {message && (

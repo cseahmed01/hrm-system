@@ -1,13 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-// Simple password verification using crypto (use bcrypt in production)
+// Password verification using bcrypt
 function verifyPassword(password, hashedPassword) {
-  const [salt, hash] = hashedPassword.split(':');
-  const verifyHash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha256').toString('hex');
-  return hash === verifyHash;
+  return bcrypt.compareSync(password, hashedPassword);
 }
 
 // Simple JWT implementation using crypto
